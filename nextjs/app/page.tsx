@@ -220,7 +220,7 @@ const HomeContent: React.FC = () => {
                       {Object.entries(addresses.core).map(([name, address]) => (
                         <li key={name} className="flex flex-col">
                           <span className="font-medium">{name}:</span>
-                          <Address address={address} />
+                         <Address address={address as `0x${string}`} />
                         </li>
                       ))}
                     </ul>
