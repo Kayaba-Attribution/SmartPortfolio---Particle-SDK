@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useEffect, useRef, useState } from "react";
 import { usePortfolioContext } from "../app/PortfolioContext";
 import { ColorType, CrosshairMode, IChartApi, UTCTimestamp, createChart } from "lightweight-charts";
@@ -158,7 +159,7 @@ export const BasicPortfolioPriceChart: React.FC<PortfolioPriceChartProps> = ({ p
               tokens: [],
             };
 
-            if(!result.percentage || !result.symbol) return;
+            if (!result.percentage || !result.symbol) return;
 
             const value = parseFloat(price) * (result.percentage / 100);
             existingPoint.total += value;

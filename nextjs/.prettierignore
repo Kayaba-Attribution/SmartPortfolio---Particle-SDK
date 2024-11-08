@@ -1,0 +1,8 @@
+node_modules
+.next
+contracts
+dist
+build
+coverage
+*.min.js
+.git

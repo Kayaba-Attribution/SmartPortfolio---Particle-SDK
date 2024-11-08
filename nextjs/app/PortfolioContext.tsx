@@ -1,7 +1,7 @@
 // PortfolioContext.tsx
 import React, { createContext, useContext, useState } from "react";
-import { formatEther } from "ethers";
 import addresses from "../contracts/addresses.json";
+import { formatEther } from "ethers";
 
 export interface PortfolioDetails {
   tokenAddresses: string[];
@@ -63,7 +63,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setPortfolioDetails,
         formatValue,
         calculateROI,
-        getTokenName
+        getTokenName,
       }}
     >
       {children}

@@ -4,7 +4,6 @@ import ERC20_BASE_ABI from "../contracts/artifacts/ERC20_BASE.json";
 import SmartBasketABI from "../contracts/artifacts/SmartBasket.json";
 import {
   PORTFOLIO_PLANS,
-  calculatePortfolioRiskLevel,
   getRiskBorderClass,
   getRiskColorClass,
   getTokenRiskByAddress,
@@ -136,11 +135,6 @@ function CreatePortfolio() {
 
   const isPlanValid = selectedPlan === "custom" ? isCustomPlanValid : true;
 
-  const getTokenName = (address: string) => {
-    const token = tokenOptions.find(t => t.address === address);
-    return token ? token.name : "Unknown";
-  };
-
   return (
     <div className="my-2 p-4 bg-base-200 rounded-lg">
       <h3 className="text-xl font-bold mb-4">Create Smart Portfolio</h3>
@@ -199,8 +193,8 @@ function CreatePortfolio() {
                   <div
                     className={`border-full p-2 w-2 ${
                       getTokenRiskByAddress(allocation.tokenAddress)
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        ? getRiskColorClass(getTokenRiskByAddress(allocation.tokenAddress)!.riskLevel)
+                        ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                          getRiskColorClass(getTokenRiskByAddress(allocation.tokenAddress)!.riskLevel)
                         : ""
                     }`}
                   ></div>

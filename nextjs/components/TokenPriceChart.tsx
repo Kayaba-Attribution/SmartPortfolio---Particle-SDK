@@ -181,7 +181,7 @@ export const TokenPriceChart: React.FC<TokenPriceChartProps> = ({
     };
 
     fetchData();
-  }, [tokenAddress, chainId, selectedTimeframe]);
+  }, [tokenAddress, chainId, selectedTimeframe, priceChange?.value]);
 
   const handleTimeframeChange = (timeframe: TimeframeOption) => {
     setSelectedTimeframe(timeframe);

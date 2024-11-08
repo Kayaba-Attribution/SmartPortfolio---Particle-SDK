@@ -68,6 +68,7 @@ export function PortfolioDistribution() {
         const currentValue = portfolio.tokenValues[index];
 
         if (tokenTotals.has(address)) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const existing = tokenTotals.get(address)!;
           tokenTotals.set(address, {
             total: existing.total + currentValue,

@@ -6,16 +6,6 @@ import { usePortfolioContext } from "./PortfolioContext";
 import { formatUnits, parseUnits } from "ethers";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
-const bigIntToString = (value: any): string => {
-  if (typeof value === "bigint") {
-    return value.toString();
-  }
-  if (Array.isArray(value)) {
-    return value.map(bigIntToString) as any;
-  }
-  return value;
-};
-
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
 };
@@ -73,11 +63,6 @@ const Swap: React.FC = () => {
     args: amount ? [parseUnits(amount, 18), [fromToken, toToken]] : undefined,
   }) as { data: any };
 
-  const fromTokenBalanceStr = bigIntToString(fromTokenBalance);
-  const toTokenBalanceStr = bigIntToString(toTokenBalance);
-  const allowanceStr = bigIntToString(allowance);
-  const estimatedAmountOutStr = bigIntToString(estimatedAmountOut);
-
   // console.log("fromTokenBalance:", fromTokenBalanceStr);
   // console.log("toTokenBalance:", toTokenBalanceStr);
   // console.log("allowance:", allowanceStr);
@@ -95,8 +80,6 @@ const Swap: React.FC = () => {
 
   const hasSufficientBalance =
     fromTokenBalance !== undefined && isAmountValid && parseUnits(amount, 18) <= fromTokenBalance;
-
-  const canSwap = isBalanceLoaded && isAmountValid && hasSufficientBalance && !needsApproval;
 
   const isSwapDisabled = isApproving || isSwapping || !isAmountValid || !isBalanceLoaded || !hasSufficientBalance;
 

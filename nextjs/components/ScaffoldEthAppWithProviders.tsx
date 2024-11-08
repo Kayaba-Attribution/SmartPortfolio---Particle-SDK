@@ -1,21 +1,62 @@
+/* eslint-disable prettier/prettier */
+// components/ScaffoldEthAppWithProviders.tsx
 "use client";
 
 import { useEffect, useState } from "react";
+import { Footer } from "./Footer";
+import { Header } from "./Header";
+import { BlockieAvatar } from "./scaffold-eth";
+import { ProgressBar } from "./scaffold-eth/ProgressBar";
+import { ConnectKitProvider, createConfig } from "@particle-network/connectkit";
+import { aa } from "@particle-network/connectkit/aa";
+import { authWalletConnectors } from "@particle-network/connectkit/auth";
+import { polygonAmoy } from "@particle-network/connectkit/chains";
+import { evmWalletConnectors } from "@particle-network/connectkit/evm";
+import { EntryPosition, wallet } from "@particle-network/connectkit/wallet";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
-import { Footer } from "~~/components/Footer";
-import { Header } from "~~/components/Header";
-import { BlockieAvatar } from "~~/components/scaffold-eth";
-import { ProgressBar } from "~~/components/scaffold-eth/ProgressBar";
-import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
-const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
-  useInitializeNativeCurrencyPrice();
 
+const particleConfig = createConfig({
+  projectId: process.env.NEXT_PUBLIC_PARTICLE_PROJECT_ID as string,
+  clientKey: process.env.NEXT_PUBLIC_PARTICLE_CLIENT_KEY as string,
+  appId: process.env.NEXT_PUBLIC_PARTICLE_APP_ID as string,
+
+  chains: [polygonAmoy],
+  walletConnectors: [
+    evmWalletConnectors({
+      metadata: {
+        name: "ScaffoldETH App",
+        description: "ScaffoldETH integration with Particle Network",
+        url: typeof window !== "undefined" ? window.location.origin : "",
+      },
+    }),
+    authWalletConnectors({
+      authTypes: ["email", "google", "apple", "twitter"],
+      fiatCoin: "USD",
+      promptSettingConfig: {
+        promptMasterPasswordSettingWhenLogin: 1,
+        promptPaymentPasswordSettingWhenSign: 1,
+      },
+    }),
+  ],
+  plugins: [
+    wallet({
+      visible: true,
+      entryPosition: EntryPosition.BR,
+    }),
+    aa({
+      name: "BICONOMY",
+      version: "2.0.0",
+    }),
+  ],
+});
+
+const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <div className="flex flex-col min-h-screen">
@@ -46,16 +87,18 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
   }, []);
 
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <ProgressBar />
-        <RainbowKitProvider
-          avatar={BlockieAvatar}
-          theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
-        >
-          <ScaffoldEthApp>{children}</ScaffoldEthApp>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ConnectKitProvider config={particleConfig}>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <ProgressBar />
+          <RainbowKitProvider
+            avatar={BlockieAvatar}
+            theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
+          >
+            <ScaffoldEthApp>{children}</ScaffoldEthApp>
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ConnectKitProvider>
   );
 };

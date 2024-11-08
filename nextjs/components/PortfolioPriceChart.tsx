@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ColorType, IChartApi, LineStyle, UTCTimestamp, createChart } from "lightweight-charts";
-import { usePortfolioContext } from "../app/PortfolioContext";
 
 interface TokenPriceData {
   timestamp: number;
@@ -58,10 +58,8 @@ export const PortfolioPriceChart: React.FC<PortfolioPriceChartProps> = ({ tokens
     percentage: number;
   } | null>(null);
 
-  const { portfolioDetails, formatValue, calculateROI, getTokenName } = usePortfolioContext();
-
-  // Fetch price data for all tokens
-  const fetchTokenPrices = async () => {
+  // UseCallback for fetchTokenPrices to prevent unnecessary re-renders
+  const fetchTokenPrices = useCallback(async () => {
     try {
       const pricePromises = tokens.map(token =>
         fetch(
@@ -80,7 +78,7 @@ export const PortfolioPriceChart: React.FC<PortfolioPriceChartProps> = ({ tokens
     } catch (error) {
       throw new Error("Failed to fetch token prices");
     }
-  };
+  }, [tokens, selectedTimeframe]);
 
   const processData = (tokenPrices: Array<{ symbol: string; data: TokenPriceData[]; percentage: number }>) => {
     const combinedData = new Map<number, ChartData>();
@@ -230,7 +228,7 @@ export const PortfolioPriceChart: React.FC<PortfolioPriceChartProps> = ({ tokens
     };
 
     setupChart();
-  }, [tokens, selectedTimeframe]);
+  }, [tokens, selectedTimeframe, fetchTokenPrices]);
 
   return (
     <div className="card w-full bg-base-100 shadow-xl">

@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { BasicPortfolioPriceChart } from "../components/BasicPortfolioPriceChart";
-import { PortfolioPriceChart } from "../components/PortfolioPriceChart";
-import { TokenPriceChart } from "../components/TokenPriceChart";
+// import { PortfolioPriceChart } from "../components/PortfolioPriceChart";
+// import { TokenPriceChart } from "../components/TokenPriceChart";
+// import { RiskChart } from "../components/ui/RiskChart";
 import { PortfolioDistribution } from "../components/ui/PortfolioDistribution";
-import { RiskChart } from "../components/ui/RiskChart";
 import addresses from "../contracts/addresses.json";
 import SmartPortfolioABI from "../contracts/artifacts/SmartBasket.json";
 import CreatePortfolio from "./CreatePortfolio";
@@ -51,22 +51,7 @@ const HomeContent: React.FC = () => {
 
   const tokenEntries = Object.entries(addresses.tokens);
 
-  const tokens = [
-    {
-      address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-      symbol: "WETH",
-      percentage: 60,
-      color: "#4ade80",
-    },
-    {
-      address: "0x514910771af9ca656af840dff83e8264ecf986ca",
-      symbol: "LINK",
-      percentage: 40,
-      color: "#fb923c",
-    },
-  ];
-
-  const { portfolioDetails, formatValue, calculateROI, getTokenName } = usePortfolioContext();
+  const { portfolioDetails } = usePortfolioContext();
 
   console.log(JSON.stringify(portfolioDetails));
   return (
@@ -249,8 +234,8 @@ const HomeContent: React.FC = () => {
               <div className="card bg-base-200 shadow-xl glow">
                 <div className="card-body">
                   {/* <PortfolioPriceChart tokens={tokens} initialTimeframe="24h" portfolioId={1} /> */}
-                  <BasicPortfolioPriceChart portfolioIndex={0} test={true}/>
-                  <BasicPortfolioPriceChart portfolioIndex={1} test={true}/>
+                  <BasicPortfolioPriceChart portfolioIndex={0} test={true} />
+                  <BasicPortfolioPriceChart portfolioIndex={1} test={true} />
                   {/* <TokenPriceChart
                     tokenAddress="0x514910771af9ca656af840dff83e8264ecf986ca"
                     tokenName="WETH"

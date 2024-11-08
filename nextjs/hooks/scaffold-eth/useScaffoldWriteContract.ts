@@ -5,7 +5,7 @@ import { Abi, ExtractAbiFunctionNames } from "abitype";
 import { Config, UseWriteContractParameters, useAccount, useWriteContract } from "wagmi";
 import { WriteContractErrorType, WriteContractReturnType } from "wagmi/actions";
 import { WriteContractVariables } from "wagmi/query";
-import { useDeployedContractInfo, useTransactor } from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 import {
   ContractAbi,
@@ -25,7 +25,6 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
   writeContractParams?: UseWriteContractParameters,
 ) => {
   const { chain } = useAccount();
-  const writeTx = useTransactor();
   const [isMining, setIsMining] = useState(false);
   const { targetNetwork } = useTargetNetwork();
 
@@ -44,6 +43,10 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
       return;
     }
 
+    if (false) {
+      console.log(variables, options);
+    }
+
     if (!chain?.id) {
       notification.error("Please connect your wallet");
       return;
@@ -55,26 +58,8 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
 
     try {
       setIsMining(true);
-      const { blockConfirmations, onBlockConfirmation, ...mutateOptions } = options || {};
-      const makeWriteWithParams = () =>
-        wagmiContractWrite.writeContractAsync(
-          {
-            abi: deployedContractData.abi as Abi,
-            address: deployedContractData.address,
-            ...variables,
-          } as WriteContractVariables<Abi, string, any[], Config, number>,
-          mutateOptions as
-            | MutateOptions<
-                WriteContractReturnType,
-                WriteContractErrorType,
-                WriteContractVariables<Abi, string, any[], Config, number>,
-                unknown
-              >
-            | undefined,
-        );
-      const writeTxResult = await writeTx(makeWriteWithParams, { blockConfirmations, onBlockConfirmation });
 
-      return writeTxResult;
+      return;
     } catch (e: any) {
       throw e;
     } finally {
