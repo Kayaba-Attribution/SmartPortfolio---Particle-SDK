@@ -26,7 +26,7 @@ const ContractList: React.FC<ContractListProps> = ({ addresses }) => {
               <tr key={name}>
                 <td>{name}</td>
                 <td>
-                  <Address address={address} />
+                  <Address address={address as `0x${string}`} />
                 </td>
               </tr>
             ))}
