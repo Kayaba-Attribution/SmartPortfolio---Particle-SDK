@@ -14,7 +14,6 @@ import Faucet from "./Faucet";
 import GetTokenBalance from "./GetTokenBalance";
 import GetUserBaskets from "./GetUserBaskets";
 import { PortfolioProvider } from "./PortfolioContext";
-import { usePortfolioContext } from "./PortfolioContext";
 import Swap from "./Swap";
 import { formatEther } from "ethers";
 import { useAccount, useReadContract } from "wagmi";
@@ -51,9 +50,9 @@ const HomeContent: React.FC = () => {
 
   const tokenEntries = Object.entries(addresses.tokens);
 
-  const { portfolioDetails } = usePortfolioContext();
+  // const { portfolioDetails } = usePortfolioContext();
 
-  console.log(JSON.stringify(portfolioDetails));
+  // console.log(JSON.stringify(portfolioDetails));
   return (
     <div className="flex flex-col min-h-screen">
       <div className="pt-8 text-center">
@@ -220,7 +219,7 @@ const HomeContent: React.FC = () => {
                       {Object.entries(addresses.core).map(([name, address]) => (
                         <li key={name} className="flex flex-col">
                           <span className="font-medium">{name}:</span>
-                         <Address address={address as `0x${string}`} />
+                          <Address address={address as `0x${string}`} />
                         </li>
                       ))}
                     </ul>

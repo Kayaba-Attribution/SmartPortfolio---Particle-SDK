@@ -36,7 +36,7 @@ export const neoX = /*#__PURE__*/ defineChain({
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [neoX],
+  targetNetworks: [chains.baseSepolia, neoX],
   //targetNetworks: [chains.hardhat],
 
   // The interval at which your front-end polls the RPC servers for new data
