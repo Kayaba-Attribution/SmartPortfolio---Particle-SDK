@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { BasicPortfolioPriceChart } from "../components/BasicPortfolioPriceChart";
+import { useSmartAccountContext } from "../components/SmartAccountContext";
 // import { PortfolioPriceChart } from "../components/PortfolioPriceChart";
 // import { TokenPriceChart } from "../components/TokenPriceChart";
 // import { RiskChart } from "../components/ui/RiskChart";
@@ -12,7 +13,7 @@ import SmartPortfolioABI from "../contracts/artifacts/SmartBasket.json";
 import CreatePortfolio from "./CreatePortfolio";
 import Faucet from "./Faucet";
 import GetTokenBalance from "./GetTokenBalance";
-import GetUserBaskets from "./GetUserBaskets";
+import GetUserPortfolios from "./GetUserPortfolios";
 import { PortfolioProvider } from "./PortfolioContext";
 import Swap from "./Swap";
 import { formatEther } from "ethers";
@@ -24,7 +25,6 @@ import {
   MagnifyingGlassIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import { useSmartAccountContext } from "../components/SmartAccountContext";
 import { Address } from "~~/components/scaffold-eth";
 
 const HomeContent: React.FC = () => {
@@ -144,7 +144,7 @@ const HomeContent: React.FC = () => {
                     </div>
                     <div className="w-full">
                       {/* <RiskChart /> */}
-                      <PortfolioDistribution />
+                      {/* <PortfolioDistribution /> */}
                     </div>
                     <div>
                       <Faucet />
@@ -247,7 +247,7 @@ const HomeContent: React.FC = () => {
               </div>
               <div className="card bg-base-200 shadow-xl glow">
                 <div className="card-body">
-                  <GetUserBaskets />
+                  <GetUserPortfolios />
                 </div>
               </div>
 

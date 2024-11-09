@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import addresses from "../contracts/addresses.json";
 import SmartPortfolioABI from "../contracts/artifacts/SmartBasket.json";
 import { type PortfolioDetails, usePortfolioContext } from "./PortfolioContext";
-import { useAccount, useReadContract, useReadContracts, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useReadContract, useReadContracts } from "wagmi";
+
+// AA
+import { useSmartAccountContext } from "../components/SmartAccountContext";
+import { encodeFunctionData } from "viem";
 
 const GetUserPortfolios: React.FC = () => {
   const {
@@ -16,8 +20,11 @@ const GetUserPortfolios: React.FC = () => {
     getTokenName,
   } = usePortfolioContext();
 
-  const { address } = useAccount();
+  const { smartAccountAddress: address, sendTransaction } = useSmartAccountContext();
   const [sellingPortfolioId, setSellingPortfolioId] = useState<number | null>(null);
+  const [isSelling, setIsSelling] = useState(false);
+  const [sellSuccess, setSellSuccess] = useState(false);
+  const [, setError] = useState<string>("");
 
   const {
     data: userPortfolios,
@@ -31,37 +38,51 @@ const GetUserPortfolios: React.FC = () => {
     args: [address],
   });
 
-  // Sell Portfolio functionality
-  const { writeContract: sellPortfolio, data: sellData } = useWriteContract();
-  const { isLoading: isSelling, isSuccess: isSellSuccess } = useWaitForTransactionReceipt({
-    hash: sellData,
-  });
+   // Handle portfolio sale using AA
+   const handleSellPortfolio = async (portfolioId: number) => {
+    try {
+      setIsSelling(true);
+      setSellingPortfolioId(portfolioId);
+      setError("");
+      
+      const data = encodeFunctionData({
+        abi: SmartPortfolioABI.abi,
+        functionName: "sellBasket",
+        args: [portfolioId],
+      });
 
-  const handleSellPortfolio = async (portfolioId: number) => {
-    setSellingPortfolioId(portfolioId);
-    sellPortfolio({
-      address: addresses.core.SmartPortfolio as `0x${string}`,
-      abi: SmartPortfolioABI.abi,
-      functionName: "sellBasket",
-      args: [portfolioId],
-    });
-  };
+      const hash = await sendTransaction({
+        to: addresses.core.SmartPortfolio as `0x${string}`,
+        data,
+      });
 
-  useEffect(() => {
-    if (isSellSuccess) {
-      setRefreshPortfolios(true);
-      setRefreshTokenBalances(true);
-      refetch();
+      if (hash) {
+        setSellSuccess(true);
+        setRefreshPortfolios(true);
+        setRefreshTokenBalances(true);
+        await refetch();
+        
+        // Clear success message after delay
+        setTimeout(() => {
+          setSellSuccess(false);
+        }, 5000);
+      }
+    } catch (err: any) {
+      console.error("Error selling portfolio:", err);
+      setError(err.message || "Failed to sell portfolio");
+    } finally {
+      setIsSelling(false);
       setSellingPortfolioId(null);
     }
-  }, [isSellSuccess, setRefreshPortfolios, setRefreshTokenBalances, refetch]);
+  };
 
   useEffect(() => {
     if (refreshPortfolios) {
       refetch();
       setRefreshPortfolios(false);
+      setRefreshTokenBalances(true);
     }
-  }, [refreshPortfolios, refetch, setRefreshPortfolios]);
+  }, [refreshPortfolios, refetch, setRefreshPortfolios, setRefreshTokenBalances]);
 
   const portfolioCount = Array.isArray(userPortfolios) ? userPortfolios.length : 0;
 
@@ -188,7 +209,7 @@ const GetUserPortfolios: React.FC = () => {
           ))}
         </tbody>
       </table>
-      {isSellSuccess && (
+      {sellSuccess && (
         <div className="alert alert-success mt-4">
           <span>Portfolio sold successfully!</span>
         </div>

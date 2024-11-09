@@ -23,6 +23,8 @@ const tokenOptions = Object.entries(tokens).map(([name, address]) => ({ name, ad
 
 function CreatePortfolio() {
   const { smartAccountAddress: userAddress, sendTransaction } = useSmartAccountContext();
+  const { setRefreshPortfolios, setRefreshTokenBalances, portfolioDetails, setPortfolioDetails } =
+    usePortfolioContext();
 
   const [allowance, setAllowance] = useState<bigint>(0n);
   const [basketAmount, setBasketAmount] = useState("");
@@ -32,12 +34,12 @@ function CreatePortfolio() {
   >([]);
   const [isApproving, setIsApproving] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [isSuccess, ] = useState(false);
+  const [txError, setTxError] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
   const basketAddress = addresses.core.SmartPortfolio as `0x${string}`;
   const usdtAddress = addresses.tokens.USDT as `0x${string}`;
-
-  const { setRefreshPortfolios, setRefreshTokenBalances } = usePortfolioContext();
 
   // Check allowance
   const { data: allowanceData, refetch: refetchAllowance } = useReadContract({
@@ -52,6 +54,17 @@ function CreatePortfolio() {
       setAllowance(allowanceData as bigint);
     }
   }, [allowanceData]);
+
+  // Reset error and success messages after delay
+  useEffect(() => {
+    if (txError || successMessage) {
+      const timer = setTimeout(() => {
+        setTxError("");
+        setSuccessMessage("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [txError, successMessage]);
 
   // Approve tokens using AA
   const handleApprove = async () => {
@@ -71,9 +84,11 @@ function CreatePortfolio() {
 
       if (hash) {
         await refetchAllowance();
+        setSuccessMessage("USDT Approval successful!");
       }
     } catch (error) {
       console.error("Error approving tokens:", error);
+      setTxError((error as string) || "Failed to approve USDT");
     } finally {
       setIsApproving(false);
     }
@@ -98,15 +113,30 @@ function CreatePortfolio() {
       });
 
       if (hash) {
-        setIsSuccess(true);
+        // Update global portfolio state
+        const newPortfolio = {
+          tokenAddresses: allocations.map(a => a.tokenAddress),
+          tokenPercentages: allocations.map(a => a.percentage),
+          tokenAmounts: allocations.map(() => BigInt(0)), // Will be updated on refresh
+          tokenValues: allocations.map(() => BigInt(0)), // Will be updated on refresh
+          investmentValue: parseEther(basketAmount),
+          totalValue: parseEther(basketAmount), // Initial value equals investment
+        };
+
+        setPortfolioDetails([...portfolioDetails, newPortfolio]);
         setRefreshPortfolios(true);
         setRefreshTokenBalances(true);
 
-        // Reset success message after delay
-        setTimeout(() => setIsSuccess(false), 5000);
+        setSuccessMessage(`Portfolio created successfully! Investment: ${basketAmount} USDT`);
+
+        // Reset form
+        setBasketAmount("");
+        setSelectedPlan("custom");
+        setCustomAllocations([]);
       }
     } catch (error) {
       console.error("Error creating basket:", error);
+      setTxError((error as string) || "Failed to create portfolio");
     } finally {
       setIsCreating(false);
     }
