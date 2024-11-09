@@ -1,52 +1,66 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
+import { useSmartAccountContext } from "../components/SmartAccountContext";
 import addresses from "../contracts/addresses.json";
 import ERC20_BASE_ABI from "../contracts/artifacts/ERC20_BASE.json";
 import { usePortfolioContext } from "./PortfolioContext";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { encodeFunctionData } from "viem";
 
 function Faucet() {
   const tokenAddress = addresses.tokens.USDT as `0x${string}`;
   const { setRefreshTokenBalances } = usePortfolioContext();
+  const { sendTransaction, smartAccountAddress } = useSmartAccountContext();
 
-  // Claim tokens from faucet
-  const { writeContract: claimFaucet, data: claimData } = useWriteContract();
-
-  const { isLoading: isClaiming, isSuccess: isClaimSuccess } = useWaitForTransactionReceipt({
-    hash: claimData,
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [txHash, setTxHash] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   const handleClaim = async () => {
     try {
-      console.log("Claiming tokens...", tokenAddress);
-      claimFaucet({
-        address: tokenAddress,
+      setIsLoading(true);
+      setError("");
+
+      const data = encodeFunctionData({
         abi: ERC20_BASE_ABI.abi,
         functionName: "claimFaucet",
+        args: [],
       });
-      console.log("Claim function called successfully");
-    } catch (error) {
-      console.error("Error calling claimFaucet:", error);
+
+      const hash = await sendTransaction({
+        to: tokenAddress,
+        data,
+      });
+
+      setTxHash(hash);
+
+      // Wait a bit before refreshing balances to allow transaction to process
+      setTimeout(() => {
+        setRefreshTokenBalances(true);
+      }, 2000);
+    } catch (err: any) {
+      console.error("Error calling claimFaucet:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (isClaimSuccess) {
-      // You can add any post-claim logic here, such as updating UI or refreshing balances
-      console.log("Tokens claimed successfully!");
-      setRefreshTokenBalances(true); // Trigger a refresh of token balances
-    }
-  }, [isClaimSuccess, setRefreshTokenBalances]);
-
   return (
     <div className="my-2 bg-base-200 rounded-lg glow">
-      <h3 className="text-lg font-bold mb-4">USDT Token Faucet</h3>
+      <h3 className="text-lg font-bold mb-4">USDT Token Faucet (Gasless)</h3>
+      <span>{smartAccountAddress}</span>
 
-      <button onClick={handleClaim} disabled={isClaiming} className="btn btn-primary w-full">
-        {isClaiming ? "Claiming..." : "Claim 1000 Tokens"}
+      <button onClick={handleClaim} disabled={isLoading || !smartAccountAddress} className="btn btn-primary w-full">
+        {isLoading ? "Claiming..." : "Claim 1000 Tokens"}
       </button>
-      {isClaimSuccess && (
-        <div className="mt-4 p-4 bg-success text-success-content rounded-lg">Tokens claimed successfully!</div>
+
+      {txHash && (
+        <div className="mt-4 p-4 bg-success text-success-content rounded-lg">
+          <p>Tokens claimed successfully!</p>
+          <p className="text-xs break-all">TX: {txHash}</p>
+        </div>
       )}
+
+      {error && <div className="mt-4 p-4 bg-error text-error-content rounded-lg">{error}</div>}
     </div>
   );
 }

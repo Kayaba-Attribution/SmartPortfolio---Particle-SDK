@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
+import { SmartAccountProvider } from "./SmartAccountContext";
 import { BlockieAvatar } from "./scaffold-eth";
 import { ProgressBar } from "./scaffold-eth/ProgressBar";
 import { ConnectKitProvider, createConfig } from "@particle-network/connectkit";
@@ -92,13 +93,15 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
     <ConnectKitProvider config={particleConfig}>
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <ProgressBar />
-          <RainbowKitProvider
-            avatar={BlockieAvatar}
-            theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
-          >
-            <ScaffoldEthApp>{children}</ScaffoldEthApp>
-          </RainbowKitProvider>
+          <SmartAccountProvider>
+            <ProgressBar />
+            <RainbowKitProvider
+              avatar={BlockieAvatar}
+              theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
+            >
+              <ScaffoldEthApp>{children}</ScaffoldEthApp>
+            </RainbowKitProvider>
+          </SmartAccountProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </ConnectKitProvider>
