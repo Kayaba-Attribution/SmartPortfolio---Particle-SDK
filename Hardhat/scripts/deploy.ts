@@ -49,7 +49,7 @@ function checkCoreAddresses() {
 
 function checkTokenAddresses() {
   const addresses = readAddresses();
-  if (!addresses.tokens.USDT || !addresses.tokens.WNEO || !addresses.tokens.WBTC || !addresses.tokens.XRP || !addresses.tokens.UNI || !addresses.tokens.LINK || !addresses.tokens.DOGE || !addresses.tokens.SHIB || !addresses.tokens.PEPE || !addresses.tokens.FLOKI) {
+  if (!addresses.tokens.USDT || !addresses.tokens.WBASE || !addresses.tokens.WBTC || !addresses.tokens.XRP || !addresses.tokens.UNI || !addresses.tokens.LINK || !addresses.tokens.DOGE || !addresses.tokens.SHIB || !addresses.tokens.PEPE || !addresses.tokens.FLOKI) {
     console.error("Tokens not deployed. Run with DEPLOY_TOKENS=true");
     process.exit(1);
   }
@@ -183,12 +183,15 @@ async function deploySmartBasket(owner: Signer, router: any, usdt: any, addresse
   return await ethers.getContractAt("SmartBasket", addresses.core.SmartBasket);
 }
 
+
+
 async function main() {
   const deployCoreFlag = process.env.DEPLOY_CORE === 'true';
   const deployTokens = process.env.DEPLOY_TOKENS === 'true';
   const setupPairs = process.env.SETUP_PAIRS === 'true';
   const deployBasket = process.env.DEPLOY_BASKET === 'true';
   const deployAll = process.env.DEPLOY_ALL === 'true';
+  const deployUSDT = process.env.DEPLOY_USDT === 'true';
 
   const [owner] = await ethers.getSigners();
   console.log(`Deploying contracts with the account: ${owner.address}`);
@@ -201,11 +204,16 @@ async function main() {
     const core = await deployCore(owner, addresses);
   }
 
+  if (deployUSDT) {
+    console.log("Deploying USDT...");
+    const usdt = await deployToken(owner, "Tether USD", "USDT", addresses);
+  }
+
   if (deployTokens || deployAll) {
     console.log("Deploying tokens...");
     // checkCoreAddresses();
-    const usdt = await deployToken(owner, "Tether USD", "USDT", addresses);
-    const eth = await deployToken(owner, "Wrapped NEO", "WNEO", addresses);
+    //const usdt = await deployToken(owner, "Tether USD", "USDT", addresses);
+    const eth = await deployToken(owner, "Wrapped Base", "WBASE", addresses);
     const wbtc = await deployToken(owner, "Wrapped Bitcoin", "WBTC", addresses);
     const xrp = await deployToken(owner, "Ripple", "XRP", addresses);
     const uni = await deployToken(owner, "Uniswap", "UNI", addresses);
@@ -227,7 +235,7 @@ async function main() {
     const usdt = await ethers.getContractAt("ERC20_BASE", addresses.tokens.USDT);
 
     // await setupTokenPair(owner, core.factory, core.router, await ethers.getContractAt("ERC20_BASE", addresses.tokens.ETH), usdt, 2000);
-    await setupTokenPair(owner, core.factory, core.router, await ethers.getContractAt("ERC20_BASE", addresses.tokens.WNEO), usdt, 9.8);
+    await setupTokenPair(owner, core.factory, core.router, await ethers.getContractAt("ERC20_BASE", addresses.tokens.WBASE), usdt, 9.8);
     await setupTokenPair(owner, core.factory, core.router, await ethers.getContractAt("ERC20_BASE", addresses.tokens.WBTC), usdt, 60000);
     await setupTokenPair(owner, core.factory, core.router, await ethers.getContractAt("ERC20_BASE", addresses.tokens.XRP), usdt, 0.5);
     await setupTokenPair(owner, core.factory, core.router, await ethers.getContractAt("ERC20_BASE", addresses.tokens.UNI), usdt, 5);

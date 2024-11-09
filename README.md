@@ -136,3 +136,14 @@ SmartBasket is a Solidity-based smart contract system that allows users to creat
 SmartBasket, with its full Uniswap V2 fork implementation, demonstrates the power and flexibility of Neo X as a platform for complex DeFi applications. By leveraging Neo X's unique features and EVM compatibility, we've created a secure, efficient, and fair token portfolio management system that contributes to the growing ecosystem of the Smart Economy.
 
 We're excited to be part of the Neo X community and look forward to further developing SmartBasket to showcase the full potential of this groundbreaking platform.
+
+
+
+### Base Sepolia
+
+https://docs.base.org/docs/contracts/
+
+Uniswap v2 Contract	Address
+Factory	0x7Ae58f10f7849cA6F5fB71b7f45CB416c9204b1e
+Router	0x1689E7B1F10000AE47eBfE339a4f69dECd19F602
+Weth 0x1689E7B1F10000AE47eBfE339a4f69dECd19F602

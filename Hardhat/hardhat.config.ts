@@ -31,7 +31,13 @@ const config: HardhatUserConfig = {
       accounts: [PRIVATE_KEY],
       gasPrice: 40000000000,  // 25 Gwei
       gas: 3000000,  // Adjust this value as needed
-    }
+    },
+    baseSepolia: {
+      chainId: 84532,
+      accounts: [PRIVATE_KEY],
+      url: "https://sepolia.base.org",
+      gas: 3000000,
+    },
   },
   etherscan: {
     customChains: [
