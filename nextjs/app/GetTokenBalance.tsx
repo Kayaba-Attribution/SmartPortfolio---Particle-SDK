@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 import TokenABI from "../contracts/artifacts/ERC20_BASE.json";
 import { usePortfolioContext } from "./PortfolioContext";
+import { useSmartAccountContext } from "../components/SmartAccountContext";
 import { formatEther } from "ethers";
 import { RefreshCw } from "lucide-react";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
 
 interface GetTokenBalanceProps {
   contractAddress: `0x${string}`;
@@ -12,7 +13,7 @@ interface GetTokenBalanceProps {
 }
 
 const GetTokenBalance: React.FC<GetTokenBalanceProps> = ({ contractAddress, userAddress, contractName }) => {
-  const { address: connectedAddress } = useAccount();
+  const { smartAccountAddress } = useSmartAccountContext();
   const { refreshTokenBalances, setRefreshTokenBalances } = usePortfolioContext();
 
   const {
@@ -80,13 +81,13 @@ const GetTokenBalance: React.FC<GetTokenBalanceProps> = ({ contractAddress, user
           <span className="font-medium">{formattedBalance}</span>
           <span className="text-sm text-base-content/70">{contractName}</span>
         </div>
-        <div className="tooltip" data-tip={formatEther(tokenBalance)}>
-          <span className="text-xs text-base-content/50">Full balance</span>
+        <div className="tooltip tooltip-bottom" data-tip={formatEther(tokenBalance)}>
+          <span className="text-xs text-base-content/50 cursor-help">Full balance</span>
         </div>
       </div>
-      {connectedAddress !== userAddress && (
-        <div className="tooltip" data-tip={`Querying balance for ${userAddress}`}>
-          <span className="text-xs text-warning">({shortenAddress(userAddress)})</span>
+      {smartAccountAddress && smartAccountAddress !== userAddress && (
+        <div className="tooltip tooltip-bottom" data-tip={`Querying balance for ${userAddress}`}>
+          <span className="text-xs text-warning cursor-help">({shortenAddress(userAddress)})</span>
         </div>
       )}
     </div>

@@ -16,7 +16,7 @@ import GetUserBaskets from "./GetUserBaskets";
 import { PortfolioProvider } from "./PortfolioContext";
 import Swap from "./Swap";
 import { formatEther } from "ethers";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
 import {
   BugAntIcon,
   CubeTransparentIcon,
@@ -24,10 +24,12 @@ import {
   MagnifyingGlassIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
+import { useSmartAccountContext } from "../components/SmartAccountContext";
 import { Address } from "~~/components/scaffold-eth";
 
 const HomeContent: React.FC = () => {
-  const { address: connectedAddress } = useAccount();
+  const { smartAccountAddress: connectedAddress } = useSmartAccountContext();
+
   const contractAddress = addresses.core.SmartPortfolio;
   const [totalUsdtInvested, setTotalUsdtInvested] = useState("0.00");
   const [isContractsVisible, setIsContractsVisible] = useState(false);
