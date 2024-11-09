@@ -174,7 +174,7 @@ const GetUserPortfolios: React.FC = () => {
         </thead>
         <tbody>
           {portfolioDetails.map((portfolio, portfolioIndex) => (
-            <tr key={portfolioIndex} className="border-blue-500">
+            <tr key={portfolioIndex} className="border-purple-700">
               <td>
                 <ul>
                   {portfolio.tokenAddresses.map((address, i) => (

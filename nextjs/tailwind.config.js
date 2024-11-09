@@ -75,14 +75,14 @@ module.exports = {
           // Adding underglow effect for cards
           ".glow": {
             backgroundColor: "#0A0A0A", // Dark background for cards
-            boxShadow: "0px 0px 20px 4px rgba(0, 200, 255, 0.15)", // Neon underglow for high-tech feel
+            boxShadow: "0px 0px 20px 4px rgba(228, 75, 224, 0.3)", // Neon purple underglow for high-tech feel
             borderRadius: "0px", // No rounding for a sleek, sharp appearance
             padding: "16px", // Padding to give card contents space
             border: "1px solid #1A1A1A", // Thin border for card separation
           },
 
           ".glow:hover": {
-            boxShadow: "0px 0px 25px 6px rgba(0, 200, 255, 0.30)", // Increase glow on hover for interactivity
+            boxShadow: "0px 0px 25px 6px rgba(228, 75, 224, 0.5)", // Increase purple glow on hover for interactivity
           },
         },
       },

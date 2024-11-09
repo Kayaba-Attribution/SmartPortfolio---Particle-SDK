@@ -16,11 +16,14 @@ import Swap from "./Swap";
 import { formatEther } from "ethers";
 import { useReadContract } from "wagmi";
 import {
+  ArrowPathIcon,
   BugAntIcon,
   CubeTransparentIcon,
   LightBulbIcon,
   MagnifyingGlassIcon,
   ShieldCheckIcon,
+  UserGroupIcon,
+  WalletIcon,
 } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 
@@ -55,68 +58,73 @@ const HomeContent: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="pt-8 text-center">
-        <div className="container mx-auto px-4 glow">
-          <h1 className="text-4xl font-extrabold mb-4">
-            SmartPortfolio: Customizable Token Portfolio Manager on Neo X
+        <div className="container mx-auto px-4">
+          <h1 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            SmartPortfolio: Web3 Made Simple with Particle Network
           </h1>
-          <p className="text-xl text-base-content opacity-80 max-w-2xl mx-auto mb-8">
-            Hackathon Submission for Neo X Code Grinder Challenge
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
+            Chain Abstraction Hackathon Submission - Empowering everyone crypto journey through social login and gasless
+            transactions
           </p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8 glow">
-        <h2 className="text-3xl font-bold mb-4">Project Overview</h2>
-        <p className="text-lg mb-6">
-          SmartPortfolio is an innovative DeFi project built on Neo X, leveraging the power of Neos EVM-compatible
-          sidechain to create a seamless and efficient token portfolio management experience. Its a Solidity-based smart
-          contract system that allows users to create and manage customizable token portfolios (baskets) using USDT as
-          the base currency. The project implements a complete Uniswap V2 fork for token swaps and liquidity provision,
-          demonstrating the full compatibility of Neo X with Ethereum tooling and complex DeFi infrastructure.
+        <h2 className="text-3xl font-bold mb-4 text-center">Project Overview</h2>
+        <p className="text-lg mb-6 text-gray-300 text-center">
+          SmartPortfolio revolutionizes DeFi accessibility by leveraging Particle Network Account Abstraction and social
+          login capabilities.
+          <br></br>Built on Base Sepolia, it demonstrates how modern Web3 infrastructure can deliver Web2-like
+          experiences for portfolio management.
         </p>
+        <div className="font-bold text-2xl text-center p-4">
+          Empower non-technical users to easily and safely invest in diversified cryptocurrency portfolios
+        </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
-        <div className="flex-1 glow p-6 rounded-lg">
-          <h3 className="text-2xl font-semibold mb-4">Key Features</h3>
-          <ul className="list-disc list-inside space-y-2">
-            <li>Create customized token baskets with up to 5 different tokens</li>
-            <li>Invest in baskets using USDT</li>
-            <li>Sell baskets and receive USDT</li>
-            <li>View basket total value and individual asset details</li>
-            <li>Seamless integration with Neo Xs high-performance EVM-based sidechain</li>
-            <li>Full Uniswap V2 functionality for efficient token swaps and liquidity provision</li>
+      <div className="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-gray-800 bg-opacity-50 p-6 rounded-lg glow">
+          <h3 className="text-2xl font-semibold mb-4">Particle Network Integration</h3>
+          <ul className="space-y-4">
+            <li className="flex items-center">
+              <UserGroupIcon className="h-6 w-6 mr-4 text-blue-400" />
+              <span>One-click social login via Particle Connect</span>
+            </li>
+            <li className="flex items-center">
+              <WalletIcon className="h-6 w-6 mr-4 text-blue-400" />
+              <span>Gasless transactions through Account Abstraction</span>
+            </li>
+            <li className="flex items-center">
+              <ShieldCheckIcon className="h-6 w-6 mr-4 text-blue-400" />
+              <span>Smart account management without seed phrases</span>
+            </li>
+            <li className="flex items-center">
+              <CubeTransparentIcon className="h-6 w-6 mr-4 text-blue-400" />
+              <span>Complete UX abstraction for seamless interactions</span>
+            </li>
           </ul>
         </div>
 
-        <div className="flex-1 glow p-6 rounded-lg">
-          <h3 className="text-2xl font-semibold mb-4">Integration with Neo X</h3>
-          <div className="space-y-4">
-            <div className="flex items-center">
-              <div className="w-10 h-10 mr-4 flex items-center justify-center">
-                <LightBulbIcon className="h-6 w-6 text-white" />
-              </div>
-              <p>Leverages Neo Xs EVM compatibility for complex Solidity contracts</p>
-            </div>
-            <div className="flex items-center">
-              <div className="w-10 h-10 mr-4 flex items-center justify-center">
-                <CubeTransparentIcon className="h-6 w-6 text-white" />
-              </div>
-              <p>Utilizes Neo Xs high throughput for efficient token swaps and basket management</p>
-            </div>
-            <div className="flex items-center">
-              <div className="w-10 h-10 mr-4 flex items-center justify-center">
-                <ShieldCheckIcon className="h-6 w-6 text-white" />
-              </div>
-              <p>Benefits from Neo Xs dBFT consensus for secure and quick transaction finality</p>
-            </div>
-            <div className="flex items-center">
-              <div className="w-10 h-10 mr-4 flex items-center justify-center">
-                <MagnifyingGlassIcon className="h-6 w-6 text-white" />
-              </div>
-              <p>Takes advantage of Neo Xs MEV resistance for fair token pricing in Uniswap pools</p>
-            </div>
-          </div>
+        <div className="bg-gray-800 bg-opacity-50 p-6 rounded-lg glow">
+          <h3 className="text-2xl font-semibold mb-4">Portfolio Features</h3>
+          <ul className="space-y-4">
+            <li className="flex items-center">
+              <LightBulbIcon className="h-6 w-6 mr-4 text-purple-400" />
+              <span>Customizable portfolios with up to 5 tokens</span>
+            </li>
+            <li className="flex items-center">
+              <ArrowPathIcon className="h-6 w-6 mr-4 text-purple-400" />
+              <span>Risk-based templates for different strategies</span>
+            </li>
+            <li className="flex items-center">
+              <CubeTransparentIcon className="h-6 w-6 mr-4 text-purple-400" />
+              <span>Real-time portfolio valuation</span>
+            </li>
+            <li className="flex items-center">
+              <ShieldCheckIcon className="h-6 w-6 mr-4 text-purple-400" />
+              <span>One-click portfolio liquidation</span>
+            </li>
+          </ul>
         </div>
       </div>
       <main className="flex-grow container mx-auto px-4 py-8">

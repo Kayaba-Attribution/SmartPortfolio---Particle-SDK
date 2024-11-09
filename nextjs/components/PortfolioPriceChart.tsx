@@ -57,8 +57,8 @@ export const PortfolioPriceChart: React.FC<PortfolioPriceChartProps> = ({ portfo
         }));
 
         const series = chart.addAreaSeries({
-          lineColor: "#4ade80",
-          topColor: "rgba(74, 222, 128, 0.4)",
+          lineColor: "#E44BE0",
+          topColor: "rgba(228, 75, 224, 0.3)",
           bottomColor: "rgba(74, 222, 128, 0)",
           lineWidth: 3,
           priceLineVisible: false,
