@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from "react";
 import addresses from "../contracts/addresses.json";
 import ERC20ABI from "../contracts/artifacts/ERC20_BASE.json";

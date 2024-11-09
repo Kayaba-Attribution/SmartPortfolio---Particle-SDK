@@ -46,7 +46,7 @@ export const TOKEN_RISK_MAPPING: Record<string, TokenRisk> = {
     description: "Stablecoin pegged to USD",
   },
   WNEO: {
-    address: addresses.tokens.WNEO,
+    address: addresses.tokens.WBASE,
     symbol: "WNEO",
     riskLevel: "Medium Risk",
     description: "Wrapped NEO token",

@@ -1,282 +1,129 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ColorType, IChartApi, LineStyle, UTCTimestamp, createChart } from "lightweight-charts";
+import React, { useEffect, useRef } from "react";
+import { usePortfolioContext } from "../app/PortfolioContext";
+import { fetchTokenPrices, formatChartValue} from "../utils/scaffold-eth/priceUtils";
+import { ColorType, IChartApi, UTCTimestamp, createChart } from "lightweight-charts";
 
-interface TokenPriceData {
-  timestamp: number;
-  price: string;
-}
-
-interface ApiResponse {
-  success: boolean;
-  results: TokenPriceData[];
-}
-
-interface PortfolioToken {
-  address: string;
-  symbol: string;
-  percentage: number;
-  color: string; // For consistent token colors
+interface PortfolioPriceChartProps {
+  portfolioIndex: number;
 }
 
 interface ChartData {
   time: UTCTimestamp;
   value: number;
-  tokens: {
-    [symbol: string]: {
-      price: number;
-      contribution: number; // Value considering allocation percentage
-    };
-  };
-  total: number;
 }
 
-interface PortfolioPriceChartProps {
-  tokens: PortfolioToken[];
-  initialTimeframe?: TimeframeOption;
-  portfolioId?: number;
-}
-
-type TimeframeOption = "24h" | "7d" | "30d" | "180d" | "1y";
-
-const timeframeOptions = [
-  { label: "24H", value: "24h" },
-  { label: "7D", value: "7d" },
-  { label: "30D", value: "30d" },
-  { label: "180D", value: "180d" },
-  { label: "1Y", value: "1y" },
-];
-
-export const PortfolioPriceChart: React.FC<PortfolioPriceChartProps> = ({ tokens, initialTimeframe = "24h" }) => {
+export const PortfolioPriceChart: React.FC<PortfolioPriceChartProps> = ({ portfolioIndex }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chart = useRef<IChartApi | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [, setError] = useState<string | null>(null);
-  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>(initialTimeframe);
-  const [portfolioChange, setPortfolioChange] = useState<{
-    value: number;
-    percentage: number;
-  } | null>(null);
-
-  // UseCallback for fetchTokenPrices to prevent unnecessary re-renders
-  const fetchTokenPrices = useCallback(async () => {
-    try {
-      const pricePromises = tokens.map(token =>
-        fetch(
-          `https://price-monitoring-hono.smart-portfolio-price-monitor.workers.dev/api/prices/1/${token.address}/history?timeframe=${selectedTimeframe}`,
-        )
-          .then(res => res.json())
-          .then((data: ApiResponse) => ({
-            symbol: token.symbol,
-            data: data.results,
-            percentage: token.percentage,
-          })),
-      );
-
-      const results = await Promise.all(pricePromises);
-      return results;
-    } catch (error) {
-      throw new Error("Failed to fetch token prices");
-    }
-  }, [tokens, selectedTimeframe]);
-
-  const processData = (tokenPrices: Array<{ symbol: string; data: TokenPriceData[]; percentage: number }>) => {
-    const combinedData = new Map<number, ChartData>();
-
-    // Process each token's data
-    tokenPrices.forEach(({ symbol, data, percentage }) => {
-      data.forEach(({ timestamp, price }) => {
-        const existingData = combinedData.get(timestamp) || {
-          time: timestamp as UTCTimestamp,
-          value: 0,
-          tokens: {},
-          total: 0,
-        };
-
-        const tokenPrice = parseFloat(price);
-        // Calculate the token's contribution based on percentage
-        const contribution = (tokenPrice * percentage) / 100;
-
-        existingData.tokens[symbol] = {
-          price: tokenPrice,
-          contribution,
-        };
-
-        // Update total
-        existingData.total = Object.values(existingData.tokens).reduce((sum, token) => sum + token.contribution, 0);
-
-        combinedData.set(timestamp, existingData);
-      });
-    });
-
-    return Array.from(combinedData.values()).sort((a, b) => (a.time as number) - (b.time as number));
-  };
+  const chartRef = useRef<IChartApi | null>(null);
+  const { portfolioDetails } = usePortfolioContext();
 
   useEffect(() => {
-    const setupChart = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+    const portfolio = portfolioDetails[portfolioIndex];
+    if (!portfolio || !chartContainerRef.current) return;
 
-        const tokenPrices = await fetchTokenPrices();
-        const chartData = processData(tokenPrices);
+    const initChart = async () => {
+      // Clean up previous chart
+      if (chartRef.current) {
+        chartRef.current.remove();
+      }
 
-        if (!chartContainerRef.current || !chartData.length) return;
+      // Type guard for container
+      if (!chartContainerRef.current) return;
 
-        // Initialize chart
-        if (!chart.current) {
-          chart.current = createChart(chartContainerRef.current, {
-            layout: {
-              background: { type: ColorType.Solid, color: "transparent" },
-              textColor: "#64748b",
-            },
-            grid: {
-              vertLines: { color: "#334155" },
-              horzLines: { color: "#334155" },
-            },
-            width: chartContainerRef.current.clientWidth,
-            height: 300,
-            timeScale: {
-              timeVisible: true,
-              secondsVisible: false,
-              borderColor: "#334155",
-            },
-            rightPriceScale: {
-              borderColor: "#334155",
-              autoScale: true,
-            },
-          });
-        }
+      // Create new chart
+      const chart = createChart(chartContainerRef.current, {
+        layout: {
+          background: { type: ColorType.Solid, color: "transparent" },
+          textColor: "#64748b",
+        },
+        width: chartContainerRef.current.clientWidth,
+        height: 300,
+        timeScale: {
+          timeVisible: true,
+          secondsVisible: false,
+        },
+      });
 
-        // Create individual series for each token
-        tokens.forEach(token => {
-          const areaSeries = chart.current!.addAreaSeries({
-            topColor: `${token.color}40`,
-            bottomColor: `${token.color}00`,
-            lineColor: token.color,
-            lineWidth: 1,
-            priceFormat: {
-              type: "price",
-              precision: 2,
-              minMove: 0.01,
-            },
-          });
+      chartRef.current = chart;
 
-          const tokenData = chartData.map(d => ({
-            time: d.time,
-            value: d.tokens[token.symbol]?.contribution || 0,
-          }));
+      // Fetch and set up data
+      const rawPriceData = await fetchTokenPrices(portfolio.tokenAddresses, portfolio.tokenAmounts);
 
-          areaSeries.setData(tokenData);
-        });
-
-        // Add total value line on top
-        const lineSeries = chart.current.addLineSeries({
-          color: "#ffffff",
-          lineWidth: 2,
-          lineStyle: LineStyle.Solid,
-          priceFormat: {
-            type: "price",
-            precision: 2,
-            minMove: 0.01,
-          },
-          title: "Total Value",
-        });
-
-        const totalData = chartData.map(d => ({
-          time: d.time,
-          value: d.total,
+      if (rawPriceData) {
+        // Convert data to proper chart format
+        const priceData: ChartData[] = rawPriceData.map(point => ({
+          time: point.time as UTCTimestamp,
+          value: point.value,
         }));
 
-        lineSeries.setData(totalData);
-
-        // Calculate portfolio change
-        const firstValue = chartData[0].total;
-        const lastValue = chartData[chartData.length - 1].total;
-        const absoluteChange = lastValue - firstValue;
-        const percentageChange = ((lastValue - firstValue) / firstValue) * 100;
-
-        setPortfolioChange({
-          value: absoluteChange,
-          percentage: percentageChange,
+        const series = chart.addAreaSeries({
+          lineColor: "#4ade80",
+          topColor: "rgba(74, 222, 128, 0.4)",
+          bottomColor: "rgba(74, 222, 128, 0)",
+          lineWidth: 3,
+          priceLineVisible: false,
+          crosshairMarkerVisible: true,
+          crosshairMarkerRadius: 6,
+          priceFormat: {
+            type: "custom",
+            formatter: (price: number) => formatChartValue(price),
+          },
         });
 
-        chart.current.timeScale().fitContent();
+        series.setData(priceData);
+        chart.timeScale().fitContent();
 
-        // Handle resize
-        const handleResize = () => {
-          if (chartContainerRef.current && chart.current) {
-            chart.current.applyOptions({
-              width: chartContainerRef.current.clientWidth,
-            });
+        // Add tooltip
+        chart.subscribeCrosshairMove(param => {
+          if (!param.time || !param.point) {
+            return;
           }
-        };
 
-        window.addEventListener("resize", handleResize);
-        return () => {
-          window.removeEventListener("resize", handleResize);
-          if (chart.current) {
-            chart.current.remove();
-            chart.current = null;
+          const timestamp = param.time as UTCTimestamp;
+          const dataPoint = priceData.find(d => d.time === timestamp);
+          if (dataPoint) {
+            const tooltipEl = document.getElementById(`chart-tooltip-${portfolioIndex}`);
+            if (tooltipEl) {
+              tooltipEl.style.display = "block";
+              tooltipEl.style.left = `${param.point.x}px`;
+              tooltipEl.style.top = `${param.point.y}px`;
+              tooltipEl.innerHTML = `
+                <div class="bg-base-200 p-2 rounded shadow">
+                  <div>${new Date(timestamp * 1000).toLocaleDateString()}</div>
+                  <div class="font-bold">${formatChartValue(dataPoint.value)}</div>
+                </div>
+              `;
+            }
           }
-        };
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load chart data");
-      } finally {
-        setIsLoading(false);
+        });
       }
     };
 
-    setupChart();
-  }, [tokens, selectedTimeframe, fetchTokenPrices]);
+    initChart();
+
+    const handleResize = () => {
+      if (chartContainerRef.current && chartRef.current) {
+        chartRef.current.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+        });
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [portfolioIndex, portfolioDetails]);
 
   return (
     <div className="card w-full bg-base-100 shadow-xl">
       <div className="card-body">
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center">
-                <h2 className="card-title">Portfolio Performance</h2>
-                {portfolioChange && (
-                  <span className={`ml-2 badge ${portfolioChange.value >= 0 ? "badge-success" : "badge-error"}`}>
-                    {portfolioChange.value >= 0 ? "▲" : "▼"} {Math.abs(portfolioChange.percentage).toFixed(2)}%
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2 items-center text-sm">
-                Total Value Line
-                <div className="w-4 h-0.5 bg-white"></div>
-                {tokens.map(token => (
-                  <div key={token.symbol} className="flex items-center gap-1">
-                    {token.symbol}: {token.percentage}%
-                    <div className="w-4 h-0.5" style={{ backgroundColor: token.color }}></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="join">
-              {timeframeOptions.map(option => (
-                <button
-                  key={option.value}
-                  className={`join-item btn btn-sm ${selectedTimeframe === option.value ? "btn-primary" : "btn-ghost"}`}
-                  onClick={() => setSelectedTimeframe(option.value as TimeframeOption)}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Chart */}
-          <div className="relative w-full h-[300px]">
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-base-100/50">
-                <div className="loading loading-spinner loading-lg"></div>
-              </div>
-            )}
-            <div ref={chartContainerRef} className="w-full h-full" />
-          </div>
+        <h2 className="card-title">Portfolio {portfolioIndex + 1} Value (30 Days)</h2>
+        <div className="relative w-full">
+          <div ref={chartContainerRef} className="w-full h-[300px]" />
+          <div
+            id={`chart-tooltip-${portfolioIndex}`}
+            className="absolute pointer-events-none"
+            style={{ display: "none" }}
+          />
         </div>
       </div>
     </div>

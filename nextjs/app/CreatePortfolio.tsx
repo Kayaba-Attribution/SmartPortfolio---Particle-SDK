@@ -34,7 +34,7 @@ function CreatePortfolio() {
   >([]);
   const [isApproving, setIsApproving] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [isSuccess, ] = useState(false);
+  const [isSuccess] = useState(false);
   const [txError, setTxError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
 

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, { useEffect } from "react";
 import TokenABI from "../contracts/artifacts/ERC20_BASE.json";
 import { usePortfolioContext } from "./PortfolioContext";
