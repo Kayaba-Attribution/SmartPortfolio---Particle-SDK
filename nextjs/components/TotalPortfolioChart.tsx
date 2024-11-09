@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useEffect, useRef } from "react";
 import { usePortfolioContext } from "../app/PortfolioContext";
 import { fetchTokenPrices, formatChartValue } from "../utils/scaffold-eth/priceUtils";

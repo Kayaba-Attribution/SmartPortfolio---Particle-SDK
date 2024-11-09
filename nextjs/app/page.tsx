@@ -2,11 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { BasicPortfolioPriceChart } from "../components/BasicPortfolioPriceChart";
 import { useSmartAccountContext } from "../components/SmartAccountContext";
 import { TotalPortfolioChart } from "../components/TotalPortfolioChart";
-// import { TokenPriceChart } from "../components/TokenPriceChart";
-// import { RiskChart } from "../components/ui/RiskChart";
 import { PortfolioDistribution } from "../components/ui/PortfolioDistribution";
 import addresses from "../contracts/addresses.json";
 import SmartPortfolioABI from "../contracts/artifacts/SmartBasket.json";
@@ -234,7 +231,7 @@ const HomeContent: React.FC = () => {
             <div className="md:col-span-2 space-y-8">
               <div className="card bg-base-200 shadow-xl glow">
                 <div className="card-body">
-                <TotalPortfolioChart />
+                  <TotalPortfolioChart />
                 </div>
               </div>
               <div className="card bg-base-200 shadow-xl glow">

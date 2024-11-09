@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { usePortfolioContext } from "../app/PortfolioContext";
-import { fetchTokenPrices, formatChartValue} from "../utils/scaffold-eth/priceUtils";
+import { fetchTokenPrices, formatChartValue } from "../utils/scaffold-eth/priceUtils";
 import { ColorType, IChartApi, UTCTimestamp, createChart } from "lightweight-charts";
 
 interface PortfolioPriceChartProps {
