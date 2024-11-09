@@ -27,7 +27,7 @@ export const ParticleConnectButton = () => {
               <span className="font-mono">{formatAddress(eoaAddress)}</span>
             </div>
 
-            {smartAccountAddress && (
+            {smartAccountAddress && isLoading && (
               <>
                 <div className="flex items-center gap-2">
                   <span className="opacity-50">SA:</span>

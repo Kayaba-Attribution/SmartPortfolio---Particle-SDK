@@ -117,5 +117,17 @@ export function useSmartAccountContext() {
   if (context === undefined) {
     throw new Error("useSmartAccountContext must be used within a SmartAccountProvider");
   }
+
+  // Check if the account or provider is initialized
+  const { aaProvider, smartAccountAddress, isLoading } = context;
+
+  if (isLoading) {
+    console.warn("Smart account is still initializing, please wait.");
+  }
+
+  if (!aaProvider || !smartAccountAddress) {
+    console.warn("Smart account or provider not initialized. Please initialize first.");
+  }
+
   return context;
 }

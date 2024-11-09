@@ -25,25 +25,24 @@ import {
 import { Address } from "~~/components/scaffold-eth";
 
 const HomeContent: React.FC = () => {
-  const projectId = process.env.NEXT_PUBLIC_PARTICLE_PROJECT_ID as string;
-  const clientKey = process.env.NEXT_PUBLIC_PARTICLE_CLIENT_KEY as string;
-  const appId = process.env.NEXT_PUBLIC_PARTICLE_APP_ID as string;
-
-  console.log({ projectId, clientKey, appId });
-
-  const { smartAccountAddress: connectedAddress } = useSmartAccountContext();
+  const { smartAccountAddress: connectedAddress, isLoading } = useSmartAccountContext();
 
   const contractAddress = addresses.core.SmartPortfolio;
   const [totalUsdtInvested, setTotalUsdtInvested] = useState("0.00");
   const [isContractsVisible, setIsContractsVisible] = useState(false);
   const [isAllTokensVisible, setIsAllTokensVisible] = useState(false);
 
-  const { data: basketsData } = useReadContract({
-    address: contractAddress as `0x${string}`,
-    abi: SmartPortfolioABI.abi,
-    functionName: "getUserBaskets",
-    args: [connectedAddress],
-  });
+  // Make sure we check if isLoading is false and connectedAddress is valid before calling the contract
+  const { data: basketsData } = useReadContract(
+    connectedAddress && !isLoading
+      ? {
+          address: contractAddress as `0x${string}`,
+          abi: SmartPortfolioABI.abi,
+          functionName: "getUserBaskets",
+          args: [connectedAddress],
+        }
+      : {},
+  );
 
   useEffect(() => {
     if (Array.isArray(basketsData)) {
@@ -55,9 +54,6 @@ const HomeContent: React.FC = () => {
 
   const tokenEntries = Object.entries(addresses.tokens);
 
-  // const { portfolioDetails } = usePortfolioContext();
-
-  // console.log(JSON.stringify(portfolioDetails));
   return (
     <div className="flex flex-col min-h-screen">
       <div className="pt-8 text-center">
@@ -131,7 +127,7 @@ const HomeContent: React.FC = () => {
         </div>
       </div>
       <main className="flex-grow container mx-auto px-4 py-8">
-        {connectedAddress ? (
+        {connectedAddress && !isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 ">
             {/* Left Panel */}
             <div className="md:col-span-1 space-y-8">
