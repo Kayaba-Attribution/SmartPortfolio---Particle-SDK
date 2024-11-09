@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+// AA
+import { useSmartAccountContext } from "../components/SmartAccountContext";
 import addresses from "../contracts/addresses.json";
 import ERC20_BASE_ABI from "../contracts/artifacts/ERC20_BASE.json";
 import SmartBasketABI from "../contracts/artifacts/SmartBasket.json";
@@ -10,19 +12,17 @@ import {
 } from "../utils/scaffold-eth/riskUtils";
 import { usePortfolioContext } from "./PortfolioContext";
 import { parseEther } from "ethers";
-import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { encodeFunctionData } from "viem";
+import { useReadContract } from "wagmi";
 
 const MAXUINT256 = 115792089237316195423570985008687907853269984665640564039457584007913129639935n;
 
 const tokens = addresses.tokens;
-
-// Remove the existing predefinedPlans and use:
 const predefinedPlans = PORTFOLIO_PLANS;
-
 const tokenOptions = Object.entries(tokens).map(([name, address]) => ({ name, address }));
 
 function CreatePortfolio() {
-  const { address: userAddress } = useAccount();
+  const { smartAccountAddress: userAddress, sendTransaction } = useSmartAccountContext();
 
   const [allowance, setAllowance] = useState<bigint>(0n);
   const [basketAmount, setBasketAmount] = useState("");
@@ -30,6 +30,9 @@ function CreatePortfolio() {
   const [customAllocations, setCustomAllocations] = useState<
     Array<{ tokenAddress: string; percentage: number; amount: number }>
   >([]);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const basketAddress = addresses.core.SmartPortfolio as `0x${string}`;
   const usdtAddress = addresses.tokens.USDT as `0x${string}`;
@@ -50,34 +53,64 @@ function CreatePortfolio() {
     }
   }, [allowanceData]);
 
-  // Approve tokens
-  const { writeContract: approveTokens, data: approveData } = useWriteContract();
-
-  const { isLoading: isApproving, isSuccess: isApproveSuccess } = useWaitForTransactionReceipt({
-    hash: approveData,
-  });
-
+  // Approve tokens using AA
   const handleApprove = async () => {
-    approveTokens({
-      address: usdtAddress,
-      abi: ERC20_BASE_ABI.abi,
-      functionName: "approve",
-      args: [basketAddress, MAXUINT256],
-    });
+    try {
+      setIsApproving(true);
+
+      const data = encodeFunctionData({
+        abi: ERC20_BASE_ABI.abi,
+        functionName: "approve",
+        args: [basketAddress, MAXUINT256],
+      });
+
+      const hash = await sendTransaction({
+        to: usdtAddress,
+        data,
+      });
+
+      if (hash) {
+        await refetchAllowance();
+      }
+    } catch (error) {
+      console.error("Error approving tokens:", error);
+    } finally {
+      setIsApproving(false);
+    }
   };
 
-  useEffect(() => {
-    if (isApproveSuccess) {
-      refetchAllowance();
+  // Create Basket using AA
+  const handleCreateBasket = async () => {
+    try {
+      setIsCreating(true);
+      const allocations = getAllocations();
+      console.log("Allocations:", allocations);
+
+      const data = encodeFunctionData({
+        abi: SmartBasketABI.abi,
+        functionName: "createBasket",
+        args: [allocations, parseEther(basketAmount)],
+      });
+
+      const hash = await sendTransaction({
+        to: basketAddress,
+        data,
+      });
+
+      if (hash) {
+        setIsSuccess(true);
+        setRefreshPortfolios(true);
+        setRefreshTokenBalances(true);
+
+        // Reset success message after delay
+        setTimeout(() => setIsSuccess(false), 5000);
+      }
+    } catch (error) {
+      console.error("Error creating basket:", error);
+    } finally {
+      setIsCreating(false);
     }
-  }, [isApproveSuccess, refetchAllowance]);
-
-  // Create Basket
-  const { writeContract: createBasket, data: createData } = useWriteContract();
-
-  const { isLoading: isCreating, isSuccess: isCreateSuccess } = useWaitForTransactionReceipt({
-    hash: createData,
-  });
+  };
 
   const handlePlanChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
@@ -110,23 +143,6 @@ function CreatePortfolio() {
     }
     return predefinedPlans[selectedPlan].allocations;
   };
-
-  const handleCreateBasket = async () => {
-    const allocations = getAllocations();
-    createBasket({
-      address: basketAddress,
-      abi: SmartBasketABI.abi,
-      functionName: "createBasket",
-      args: [allocations, parseEther(basketAmount)],
-    });
-  };
-
-  useEffect(() => {
-    if (isCreateSuccess) {
-      setRefreshPortfolios(true);
-      setRefreshTokenBalances(true); // Trigger a refresh of token balances
-    }
-  }, [isCreateSuccess, setRefreshPortfolios, setRefreshTokenBalances]);
 
   const isCustomPlanValid =
     customAllocations.length > 0 &&
@@ -263,7 +279,7 @@ function CreatePortfolio() {
         </div>
       )}
 
-      {isCreateSuccess && (
+      {isSuccess && (
         <div className="mt-4 p-4 bg-success text-success-content rounded-lg">Basket created successfully!</div>
       )}
     </div>

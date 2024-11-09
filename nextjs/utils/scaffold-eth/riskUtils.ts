@@ -109,8 +109,8 @@ export const PORTFOLIO_PLANS: PortfolioPlan[] = [
     description: "Conservative portfolio focused on stability",
     allocations: [
       {
-        tokenAddress: addresses.tokens.WNEO,
-        symbol: "WNEO",
+        tokenAddress: addresses.tokens.WBASE,
+        symbol: "WBASE",
         percentage: 60,
         amount: 0,
         riskLevel: "Medium Risk",
