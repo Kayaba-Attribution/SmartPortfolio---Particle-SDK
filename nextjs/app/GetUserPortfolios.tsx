@@ -1,13 +1,13 @@
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from "react";
+// AA
+import { useSmartAccountContext } from "../components/SmartAccountContext";
 import addresses from "../contracts/addresses.json";
 import SmartPortfolioABI from "../contracts/artifacts/SmartBasket.json";
 import { type PortfolioDetails, usePortfolioContext } from "./PortfolioContext";
-import { useReadContract, useReadContracts } from "wagmi";
-
-// AA
-import { useSmartAccountContext } from "../components/SmartAccountContext";
+import { PortfolioPriceChart } from "../components/PortfolioPriceChart";
 import { encodeFunctionData } from "viem";
+import { useReadContract, useReadContracts } from "wagmi";
 
 const GetUserPortfolios: React.FC = () => {
   const {
@@ -26,6 +26,24 @@ const GetUserPortfolios: React.FC = () => {
   const [isSelling, setIsSelling] = useState(false);
   const [sellSuccess, setSellSuccess] = useState(false);
   const [, setError] = useState<string>("");
+  const [selectedPortfolioIndex, setSelectedPortfolioIndex] = useState<number | null>(null);
+
+  // Function to handle modal open/close
+  const openChartModal = (index: number) => {
+    setSelectedPortfolioIndex(index);
+    const modal = document.getElementById("chart-modal") as HTMLDialogElement;
+    if (modal) {
+      modal.showModal();
+    }
+  };
+
+  const closeChartModal = () => {
+    setSelectedPortfolioIndex(null);
+    const modal = document.getElementById("chart-modal") as HTMLDialogElement;
+    if (modal) {
+      modal.close();
+    }
+  };
 
   const {
     data: userPortfolios,
@@ -39,13 +57,13 @@ const GetUserPortfolios: React.FC = () => {
     args: [address],
   });
 
-   // Handle portfolio sale using AA
-   const handleSellPortfolio = async (portfolioId: number) => {
+  // Handle portfolio sale using AA
+  const handleSellPortfolio = async (portfolioId: number) => {
     try {
       setIsSelling(true);
       setSellingPortfolioId(portfolioId);
       setError("");
-      
+
       const data = encodeFunctionData({
         abi: SmartPortfolioABI.abi,
         functionName: "sellBasket",
@@ -62,7 +80,7 @@ const GetUserPortfolios: React.FC = () => {
         setRefreshPortfolios(true);
         setRefreshTokenBalances(true);
         await refetch();
-        
+
         // Clear success message after delay
         setTimeout(() => {
           setSellSuccess(false);
@@ -151,7 +169,7 @@ const GetUserPortfolios: React.FC = () => {
             <th>Initial Investment</th>
             <th>Current Value</th>
             <th>ROI</th>
-            <th>Action</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -193,7 +211,9 @@ const GetUserPortfolios: React.FC = () => {
                   {calculateROI(portfolio.totalValue, portfolio.investmentValue)}%
                 </span>
               </td>
-              <td>
+              <td className="flex gap-2">
+                {" "}
+                {/* Added flex and gap */}
                 <button
                   onClick={() => handleSellPortfolio(portfolioIndex)}
                   disabled={isSelling && sellingPortfolioId === portfolioIndex}
@@ -205,11 +225,33 @@ const GetUserPortfolios: React.FC = () => {
                     "Sell"
                   )}
                 </button>
+                <button onClick={() => openChartModal(portfolioIndex)} className="btn btn-primary btn-sm">
+                  📈 Chart
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Chart Modal */}
+      <dialog id="chart-modal" className="modal">
+        <div className="modal-box w-11/12 max-w-5xl">
+          <form method="dialog">
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={closeChartModal}>
+              ✕
+            </button>
+          </form>
+          <h3 className="font-bold text-lg mb-4">Portfolio Performance</h3>
+          <div className="w-full">
+            {selectedPortfolioIndex !== null && <PortfolioPriceChart portfolioIndex={selectedPortfolioIndex} />}
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={closeChartModal}>close</button>
+        </form>
+      </dialog>
+
       {sellSuccess && (
         <div className="alert alert-success mt-4">
           <span>Portfolio sold successfully!</span>
