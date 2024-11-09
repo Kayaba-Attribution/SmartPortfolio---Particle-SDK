@@ -5,7 +5,7 @@ import { type Eip1193Provider, ethers } from "ethers";
 import { type Hash } from "viem";
 
 interface SmartAccountContextType {
-  smartAccount: any;
+  smartAccount: any | undefined;
   smartAccountAddress: string | undefined;
   chainId: string | undefined;
   isLoading: boolean;

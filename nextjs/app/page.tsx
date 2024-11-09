@@ -26,6 +26,7 @@ import { Address } from "~~/components/scaffold-eth";
 
 const HomeContent: React.FC = () => {
   const { smartAccountAddress: connectedAddress, isLoading } = useSmartAccountContext();
+  console.log("connectedAddress", connectedAddress);
 
   const contractAddress = addresses.core.SmartPortfolio;
   const [totalUsdtInvested, setTotalUsdtInvested] = useState("0.00");
