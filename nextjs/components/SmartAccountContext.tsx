@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { SendTransactionMode } from "@particle-network/aa";
-import { useAccount, useSmartAccount, useWallets } from "@particle-network/connectkit";
+import { AAWrapProvider, SendTransactionMode } from "@particle-network/aa";
+import { useAccount, useSmartAccount } from "@particle-network/connectkit";
+import { type Eip1193Provider, ethers } from "ethers";
 import { type Hash } from "viem";
 
 interface SmartAccountContextType {
@@ -8,6 +9,7 @@ interface SmartAccountContextType {
   smartAccountAddress: string | undefined;
   chainId: string | undefined;
   isLoading: boolean;
+  aaProvider: ethers.BrowserProvider | null;
   sendTransaction: (tx: TransactionRequest) => Promise<Hash>;
 }
 
@@ -21,28 +23,36 @@ const SmartAccountContext = createContext<SmartAccountContextType | undefined>(u
 
 export function SmartAccountProvider({ children }: { children: React.ReactNode }) {
   const { isConnected } = useAccount();
-  const [wallets] = useWallets();
   const smartAccount = useSmartAccount();
   const [smartAccountAddress, setSmartAccountAddress] = useState<string>();
   const [chainId, setChainId] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
+  const [aaProvider, setAAProvider] = useState<ethers.BrowserProvider | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    const getSmartAccountDetails = async () => {
+    const setupAccount = async () => {
       if (!smartAccount || !isConnected) return;
 
       setIsLoading(true);
       try {
-        const [addr, chainId] = await Promise.all([smartAccount.getAddress(), smartAccount.getChainId()]);
+        // Create AA-enabled provider with gasless mode
+        const customProvider = new ethers.BrowserProvider(
+          new AAWrapProvider(smartAccount, SendTransactionMode.Gasless) as Eip1193Provider,
+          "any",
+        );
+
+        // Get account details
+        const [address, chain] = await Promise.all([smartAccount.getAddress(), smartAccount.getChainId()]);
 
         if (isMounted) {
-          setSmartAccountAddress(addr);
-          setChainId(String(chainId));
+          setAAProvider(customProvider);
+          setSmartAccountAddress(address);
+          setChainId(chain);
         }
       } catch (error) {
-        console.error("Error fetching smart account details:", error);
+        console.error("Error setting up smart account:", error);
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -50,33 +60,35 @@ export function SmartAccountProvider({ children }: { children: React.ReactNode }
       }
     };
 
-    if (isConnected && wallets?.connector?.walletConnectorType === "evmWallet") {
-      getSmartAccountDetails();
-    }
+    setupAccount();
 
     return () => {
       isMounted = false;
     };
-  }, [isConnected, smartAccount, wallets]);
+  }, [isConnected, smartAccount]);
 
   const sendTransaction = async (tx: TransactionRequest): Promise<Hash> => {
-    if (!smartAccount) {
-      throw new Error("Smart account not initialized");
+    if (!aaProvider || !smartAccountAddress) {
+      throw new Error("Provider not initialized");
     }
 
     try {
-      const aaTx = {
-        tx: {
-          to: tx.to,
-          data: tx.data,
-          value: tx.value ? `0x${tx.value.toString(16)}` : undefined,
-        },
-        mode: SendTransactionMode.Gasless,
+      const signer = await aaProvider.getSigner();
+
+      const transaction = {
+        to: tx.to,
+        data: tx.data,
+        value: tx.value ? ethers.toQuantity(tx.value) : undefined,
       };
 
-      const hash = await smartAccount.sendTransaction(aaTx);
-      return hash as Hash;
+      const txResponse = await signer.sendTransaction(transaction);
+
+      // Wait for transaction to be mined
+      const receipt = await txResponse.wait();
+
+      return receipt?.hash as Hash;
     } catch (error: any) {
+      console.error("Transaction error:", error);
       if (error.code === 40305) {
         throw new Error("Gasless transaction failed. The paymaster may be unavailable or conditions not met.");
       }
@@ -91,6 +103,7 @@ export function SmartAccountProvider({ children }: { children: React.ReactNode }
         smartAccountAddress,
         chainId,
         isLoading,
+        aaProvider,
         sendTransaction,
       }}
     >
