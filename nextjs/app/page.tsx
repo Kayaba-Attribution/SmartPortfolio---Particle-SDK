@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { useSmartAccountContext } from "../components/SmartAccountContext";
 import { TotalPortfolioChart } from "../components/TotalPortfolioChart";
 import { PortfolioDistribution } from "../components/ui/PortfolioDistribution";
@@ -17,10 +16,8 @@ import { formatEther } from "ethers";
 import { useReadContract } from "wagmi";
 import {
   ArrowPathIcon,
-  BugAntIcon,
   CubeTransparentIcon,
   LightBulbIcon,
-  MagnifyingGlassIcon,
   ShieldCheckIcon,
   UserGroupIcon,
   WalletIcon,
@@ -269,7 +266,6 @@ const HomeContent: React.FC = () => {
           </div>
         )}
       </main>
-
     </div>
   );
 };
