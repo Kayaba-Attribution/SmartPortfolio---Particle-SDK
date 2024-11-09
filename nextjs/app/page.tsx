@@ -25,6 +25,12 @@ import {
 import { Address } from "~~/components/scaffold-eth";
 
 const HomeContent: React.FC = () => {
+  const projectId = process.env.NEXT_PUBLIC_PARTICLE_PROJECT_ID as string;
+  const clientKey = process.env.NEXT_PUBLIC_PARTICLE_CLIENT_KEY as string;
+  const appId = process.env.NEXT_PUBLIC_PARTICLE_APP_ID as string;
+
+  console.log({ projectId, clientKey, appId });
+
   const { smartAccountAddress: connectedAddress } = useSmartAccountContext();
 
   const contractAddress = addresses.core.SmartPortfolio;

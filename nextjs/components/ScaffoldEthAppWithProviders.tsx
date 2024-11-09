@@ -24,6 +24,17 @@ import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 /* eslint-disable prettier/prettier */
 // components/ScaffoldEthAppWithProviders.tsx
 
+/* eslint-disable prettier/prettier */
+// components/ScaffoldEthAppWithProviders.tsx
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 const particleConfig = createConfig({
   projectId: process.env.NEXT_PUBLIC_PARTICLE_PROJECT_ID as string,
   clientKey: process.env.NEXT_PUBLIC_PARTICLE_CLIENT_KEY as string,
@@ -51,6 +62,9 @@ const particleConfig = createConfig({
     wallet({
       visible: true,
       entryPosition: EntryPosition.BR,
+      customStyle: {
+        supportChains: [baseSepolia],
+      },
     }),
     aa({
       name: "BICONOMY",
@@ -72,14 +86,6 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
 export const ScaffoldEthAppWithProviders = ({ children }: { children: React.ReactNode }) => {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
@@ -88,6 +94,11 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Don't render anything until mounted to prevent hydration issues
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <ConnectKitProvider config={particleConfig}>
