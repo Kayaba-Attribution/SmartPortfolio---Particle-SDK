@@ -37,12 +37,12 @@ interface TokenPriceResponse {
 }
 
 
-export const fetchTokenPrices = async (tokenAddresses: string[], amounts: bigint[], decimals = 18) => {
+export const fetchTokenPrices = async (tokenAddresses: string[], amounts: bigint[], days: number, decimals = 18) => {
     // Get timestamps for last 7 days at midnight UTC
     const now = Math.floor(Date.now() / 1000);
     const dayInSeconds = 86400;
-    const timestamps = Array.from({ length: 30 }, (_, i) => {
-        const date = new Date((now - (30 - i) * dayInSeconds) * 1000);
+    const timestamps = Array.from({ length: days }, (_, i) => {
+        const date = new Date((now - (days - i) * dayInSeconds) * 1000);
         date.setUTCHours(0, 0, 0, 0);
         return Math.floor(date.getTime() / 1000);
     });

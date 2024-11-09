@@ -44,7 +44,7 @@ export const TotalPortfolioChart: React.FC = () => {
 
       // Fetch data for all portfolios
       const portfolioPrices = await Promise.all(
-        portfolioDetails.map(portfolio => fetchTokenPrices(portfolio.tokenAddresses, portfolio.tokenAmounts)),
+        portfolioDetails.map(portfolio => fetchTokenPrices(portfolio.tokenAddresses, portfolio.tokenAmounts, 30)),
       );
 
       // Combine all portfolio data
