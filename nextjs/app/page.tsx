@@ -144,7 +144,7 @@ const HomeContent: React.FC = () => {
                     </div>
                     <div className="w-full">
                       {/* <RiskChart /> */}
-                      {/* <PortfolioDistribution /> */}
+                      <PortfolioDistribution />
                     </div>
                     <div>
                       <Faucet />
