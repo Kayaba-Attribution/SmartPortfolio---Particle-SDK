@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { BasicPortfolioPriceChart } from "../components/BasicPortfolioPriceChart";
 import { useSmartAccountContext } from "../components/SmartAccountContext";
-import { PortfolioPriceChart } from "../components/PortfolioPriceChart";
+import { TotalPortfolioChart } from "../components/TotalPortfolioChart";
 // import { TokenPriceChart } from "../components/TokenPriceChart";
 // import { RiskChart } from "../components/ui/RiskChart";
 import { PortfolioDistribution } from "../components/ui/PortfolioDistribution";
@@ -234,16 +234,7 @@ const HomeContent: React.FC = () => {
             <div className="md:col-span-2 space-y-8">
               <div className="card bg-base-200 shadow-xl glow">
                 <div className="card-body">
-                  {/* <PortfolioPriceChart tokens={tokens} initialTimeframe="24h" portfolioId={1} /> */}
-                  <PortfolioPriceChart portfolioIndex={1}  />
-                  {/* <BasicPortfolioPriceChart portfolioIndex={1} test={true} /> */}
-                  
-                  {/* <TokenPriceChart
-                    tokenAddress="0x514910771af9ca656af840dff83e8264ecf986ca"
-                    tokenName="WETH"
-                    chainId={1}
-                    initialTimeframe="24h"
-                  /> */}
+                <TotalPortfolioChart />
                 </div>
               </div>
               <div className="card bg-base-200 shadow-xl glow">
